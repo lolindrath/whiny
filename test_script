@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export WHINY_PATH=$HOME/proj/whiny/
+rm -rf ~/.whiny
+python ./whiny.py "add @Work" "add %Project" "add do something with things @Work %Project" "add nothing" "ls" quit
+
