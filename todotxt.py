@@ -51,21 +51,28 @@ class TodoTxt():
     def remove(self, num):
         del self.tasks[num]
 
-    def write_tasks(self):
-        pass
+    def write_tasks(self, file):
+        with open(file, "w") as f:
+            for num,task in self.tasks.iteritems():
+                t = ""
+                if task['waiting']:
+                    t += "WAIT"
+                t += task['created_on'] + " " + task['task'] + " ".join(task['contexts']) + " " + " ".join(task['projects']) + "\n"
+                f.write(t)
 
     def read_tasks(self, file):
         count = 0
         tasks = {}
 
         try:
-            for line in open(file).readlines():
-                if(line.strip() == ""):
-                    continue
-                count = count + 1
-                tasks[count] = self.parse_line(line.rstrip())
-            self.tasks = tasks
-            self.task_count = count
+            with open(file) as f:
+                for line in f.readlines():
+                    if(line.strip() == ""):
+                        continue
+                    count = count + 1
+                    tasks[count] = self.parse_line(line.rstrip())
+                self.tasks = tasks
+                self.task_count = count
         except(IOError, os.error):
             return {}
 
