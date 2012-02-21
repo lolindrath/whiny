@@ -8,8 +8,10 @@ import cmd
 
 import sys, os
 import pprint
-import re, string
-import subprocess, shlex
+
+#Whiny modules
+from todotxt import TodoTxt
+from table import Table
 
 #WHINY_PATH = os.path.join(os.path.expanduser("~"), ".whiny")
 WHINY_PATH = os.path.expanduser("~/docs")
@@ -19,88 +21,6 @@ TODO_PATH = os.path.join(WHINY_PATH, "TODO.txt")
 PROJ_PATH = os.path.join(WHINY_PATH, "PROJECTS.md")
 DONE_PATH = os.path.join(WHINY_PATH, "DONE.txt")
 
-class TodoTxt():
-    self.tasks = {}
-
-    def write_tasks(self):
-        pass
-
-    def read_tasks(self, file):
-        count = 0
-        tasks = {}
-
-        try:
-            for line in open(file).readlines():
-                if(line.strip() == ""):
-                    continue
-                count = count + 1
-                tasks[count] = self.parse_line(line.rstrip())
-            return tasks
-        except(IOError, os.error):
-            return {}
-
-    def parse_line(self, line):
-        words = line.split()
-        projects = []
-        contexts = []
-        waiting = False
-        rest = ""
-        created_on = ""
-
-        for word in words:
-            match = re.search('\d\d\d\d-\d\d-\d\d', word)
-
-            if word.startswith("@"):
-                contexts.append(word)
-            elif word.startswith("+"):
-                projects.append(word)
-            elif word == "WAIT":
-                waiting = True
-            elif match:
-                created_on = match.group(0)
-            elif word.startswith("DUE:"):
-                #TODO: implement me
-                pass
-            else:
-                rest = rest + word + " "
-
-        return [rest, contexts, projects, created_on, waiting]
-
-class Table():
-    def __init__(self):
-        pass
-
-    def create_table(self, data):
-        width = len(data[0]) * [0]
-
-        #calc max width of each column
-        for row in data:
-            for idx, col in enumerate(row):
-                if len(str(col)) > width[idx]:
-                    width[idx] = len(str(col))
-                    #spaces[idx] = (width[idx] - len(str(col)))
-                    #print("width[%s] = %s spaces[%s] = %s" % (idx, width[idx], idx, spaces[idx]))
-
-        max_width = 0
-        # calc the max width of the whole table
-        for idx, w in enumerate(width):
-            max_width = max_width + w + 3
-        max_width = max_width + 2
-
-        print "-" * max_width
-
-        for row_idx,row in enumerate(data):
-            for idx, col in enumerate(row):
-                if str(col) == 'None':
-                    col = ''
-
-                space = " " * (width[idx] - len(str(col)))
-                sys.stdout.write("| %s%s " % (str(col), space))
-            print " |"
-            if row_idx == 0:
-                print "-" *  max_width
-
-        print "-" * max_width
 
 class Whiny(cmd.Cmd):
     """ Whiny """
@@ -132,8 +52,11 @@ class Whiny(cmd.Cmd):
         self.cur_context = None
         self.cur_project = None
 
-        self.parser = TodoTxt()
-        self.tasks = self.parser.read_tasks(TODO_PATH)
+        self.todotxt = TodoTxt()
+        self.todotxt.read_tasks(TODO_PATH)
+
+        pprint.pprint(self.todotxt.get_contexts())
+        pprint.pprint(self.todotxt.get_projects())
 
     def do_cd(self, dir):
         if dir.startswith('@'):
@@ -144,7 +67,7 @@ class Whiny(cmd.Cmd):
             pass
 
     def do_add(self, line):
-        task = self.parser.parse_line(line)
+        task = self.todotxt.add(line)
         pprint.pprint(task)
         pass
 
@@ -155,7 +78,9 @@ class Whiny(cmd.Cmd):
     def do_ls(self, line):
         #TODO: list tasks in current project/context
         #TODO: add searching
-        pprint.pprint(self.tasks)
+        #pprint.pprint(self.todotxt.get_tasks())
+        table = Table()
+        table.create_table(self.todotxt.get_tasks_table())
 
     def do_do(self, line):
         pass
