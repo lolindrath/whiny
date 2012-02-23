@@ -18,9 +18,9 @@ from table import Table
 WHINY_PATH = os.path.expanduser("~/proj/whiny")
 if os.environ.has_key('WHINY_PATH'):
     WHINY_PATH = os.environ['WHINY_PATH']
-TODO_PATH = os.path.join(WHINY_PATH, "TODO.txt")
-PROJ_PATH = os.path.join(WHINY_PATH, "PROJECTS.md")
-DONE_PATH = os.path.join(WHINY_PATH, "DONE.txt")
+TODO_FILE = os.path.join(WHINY_PATH, "TODO.txt")
+PROJ_FILE = os.path.join(WHINY_PATH, "PROJECTS.md")
+DONE_FILE = os.path.join(WHINY_PATH, "DONE.txt")
 
 
 class Whiny(cmd.Cmd):
@@ -41,7 +41,6 @@ class Whiny(cmd.Cmd):
         else:
             self.prompt = "Whiny> "
 
-
     def __init__(self, completekey=None, stdin=None, stdout=None):
         #start up the command handling
         cmd.Cmd.__init__(self)
@@ -53,12 +52,31 @@ class Whiny(cmd.Cmd):
         self.cur_context = None
         self.cur_project = None
 
-        print "Reading tasks from: ", TODO_PATH
+        print "Reading tasks from: ", TODO_FILE
         self.todotxt = TodoTxt()
-        self.todotxt.read_tasks(TODO_PATH)
+        self.todotxt.read_tasks(TODO_FILE, DONE_FILE)
 
         pprint.pprint(self.todotxt.get_contexts())
         pprint.pprint(self.todotxt.get_projects())
+
+    def confirm(self, prompt_str="Confirm", allow_empty=False, default=False):
+      fmt = (prompt_str, 'y', 'n') if default else (prompt_str, 'n', 'y')
+      if allow_empty:
+        prompt = '%s [%s]|%s: ' % fmt
+      else:
+        prompt = '%s %s|%s: ' % fmt
+     
+      while True:
+        ans = raw_input(prompt).lower()
+     
+        if ans == '' and allow_empty:
+          return default
+        elif ans == 'y':
+          return True
+        elif ans == 'n':
+          return False
+        else:
+          print 'Please enter y or n.'
 
     def do_cd(self, dir):
         if dir.startswith('@'):
@@ -108,7 +126,7 @@ class Whiny(cmd.Cmd):
 
     def do_save(self, line):
         print "Saving Tasks..."
-        self.todotxt.write_tasks(TODO_PATH)
+        self.todotxt.save(TODO_FILE, DONE_FILE)
 
     def do_exit(self, line):
         return True
@@ -120,7 +138,9 @@ class Whiny(cmd.Cmd):
         return True
 
     def postloop(self):
-        print
+        if self.todotxt.dirty:
+            if self.confirm("Do you want to save?", True, True):
+                self.do_save("")
         print "Goodbye."
 
 def main():

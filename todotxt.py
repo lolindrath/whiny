@@ -2,10 +2,11 @@ import os
 from sets import Set
 # local imports
 from task import Task
-import pprint
 
 class TodoTxt():
     tasks = {}
+    done = {}
+
     dirty = False
 
     def filter(self, fields):
@@ -43,7 +44,10 @@ class TodoTxt():
         return table_tasks
 
     def mark_done(self, hash):
+        self.dirty = True
         self.tasks[hash].mark_done()
+        self.done[hash] = self.tasks[hash]
+        del self.tasks[hash]
 
     def get_tasks(self):
         return self.tasks
@@ -63,29 +67,47 @@ class TodoTxt():
         return Set(projects)
 
     def add(self, line):
+        self.dirty = True
         task = self.parse_line(line)
         self.tasks[task.to_hash()] = task
         return task
 
     def remove(self, hash):
+        self.dirty = True
         del self.tasks[hash]
 
-    def write_tasks(self, file):
-        with open(file, "w") as f:
+    def save(self, tasks_file, done_file):
+        with open(tasks_file, "w") as f:
             for num,task in self.tasks.iteritems():
                 f.write(task.to_s())
 
-    def read_tasks(self, file):
+        with open(done_file, "w") as f:
+            for num,task in self.done.iteritems():
+                f.write(task.to_s())
+
+        self.dirty = False
+
+    def read_tasks(self, tasks_file, done_file):
         tasks = {}
+        done = {}
 
         try:
-            with open(file) as f:
+            with open(tasks_file) as f:
                 for line in f.readlines():
                     if(line.strip() == ""):
                         continue
                     task = Task.parse_line(line.rstrip())
                     tasks[task.to_hash()] = task
                 self.tasks = tasks
+
+            with open(done_file) as f:
+                for line in f.readlines():
+                    if(line.strip() == ""):
+                        continue
+                    task = Task.parse_line(line.rstrip())
+                    task.done = True
+                    done[task.to_hash()] = task
+                self.done = done
         except(IOError, os.error):
             return {}
 

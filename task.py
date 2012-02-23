@@ -32,7 +32,8 @@ class Task():
     def to_s(self):
         t = ""
         if self.done:
-            t += "x " + self.completed_on
+            t += "DONE:" + self.completed_on
+
         if self.waiting:
             t += "WAIT "
 
