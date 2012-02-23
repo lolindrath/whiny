@@ -14,7 +14,8 @@ from todotxt import TodoTxt
 from table import Table
 
 #WHINY_PATH = os.path.join(os.path.expanduser("~"), ".whiny")
-WHINY_PATH = os.path.expanduser("~/docs")
+#WHINY_PATH = os.path.expanduser("~/docs")
+WHINY_PATH = os.path.expanduser("~/proj/whiny")
 if os.environ.has_key('WHINY_PATH'):
     WHINY_PATH = os.environ['WHINY_PATH']
 TODO_PATH = os.path.join(WHINY_PATH, "TODO.txt")
@@ -52,6 +53,7 @@ class Whiny(cmd.Cmd):
         self.cur_context = None
         self.cur_project = None
 
+        print "Reading tasks from: ", TODO_PATH
         self.todotxt = TodoTxt()
         self.todotxt.read_tasks(TODO_PATH)
 
@@ -78,15 +80,35 @@ class Whiny(cmd.Cmd):
     def do_ls(self, line):
         #TODO: list tasks in current project/context
         #TODO: add searching
-        #pprint.pprint(self.todotxt.get_tasks())
         table = Table()
-        table.create_table(self.todotxt.get_tasks_table())
+        table.create_table(self.todotxt.get_tasks_table({'done': False, 'waiting': False}))
+
+    def do_waiting(self, line):
+        #TODO: list tasks in current project/context
+        #TODO: add searching
+        table = Table()
+        table.create_table(self.todotxt.get_tasks_table({'waiting': True, 'done': False}))
 
     def do_do(self, line):
+        self.do_done(line)
         pass
 
     def do_done(self, line):
+        #TODO: support multiple item #'s
+        self.todotxt.mark_done(line)
         pass
+
+    def do_due(self, line):
+        #TODO: implement
+        pass
+
+    def do_append(self, line):
+        #TODO: implement
+        pass
+
+    def do_save(self, line):
+        print "Saving Tasks..."
+        self.todotxt.write_tasks(TODO_PATH)
 
     def do_exit(self, line):
         return True

@@ -1,14 +1,21 @@
 Features
 ========
 * Commandline with autocompletion
-* `[ ]` Projects / Next Actions / Contexts
+* Projects / Next Actions / Contexts
+* Due dates
+
+Todo
+========
 * `[ ]` ANSI colors
-* `[ ]` Due dates
 * `[ ]` Aging report
 * `[ ]` Be in a context or a project/context
-* `[ ]` Built in support for tags $today, $tomorrow, $waitingfor and $someday
 * `[ ]` Custom prompt showing rolled up data about total tasks, etc.
 * `[ ]` HTML reporting
+* `[ ]` Auto-archive done tasks to done.txt
+
+Maybe
+=====
+* `[ ]` Built in support for tags $today, $tomorrow, $waitingfor and $someday
 
 
 Symbols
