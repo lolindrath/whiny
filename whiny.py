@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 # bash like command-line support
-#import cmd2 as cmd 
-import cmd
+import cmd2 as cmd 
+#import cmd
+
 # ANSI color support
-#from colorama import init, Fore, Back, Style
+from colorama import init, Fore, Back, Style
 
 import sys, os
 import pprint
@@ -45,7 +46,7 @@ class Whiny(cmd.Cmd):
         #start up the command handling
         cmd.Cmd.__init__(self)
         #start up the ANSI color support 
-        #init()
+        init()
         if not os.path.exists(WHINY_PATH):
             os.mkdir(WHINY_PATH)
 

@@ -1,6 +1,7 @@
 import re
 from datetime import date
 import hashlib
+from colorama import init, Fore, Back, Style
 
 class Task():
     task = ""
